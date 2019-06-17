@@ -9,6 +9,7 @@ import (
 var (
 	DefaultDBUrl   = "mongodb://127.0.0.1"
 	Port           = ":5000"
+	EventBroker    = "rabbitmq"
 	EventBrokerURL = "amqp://guest:guest@localhost:5672"
 	Exchange       = "events"
 	Queue          = "event.created"
@@ -17,7 +18,8 @@ var (
 type Configuration struct {
 	DatabaseURL    string `json:"databaseurl"`
 	Port           string `json:"port"`
-	EventBrokerURL string `json:"eventbroker"`
+	EventBroker    string `json:"eventbroker"`
+	EventBrokerURL string `json:"eventbrokerurl"`
 	Exchange       string `json:"exchange"`
 	Queue          string `json:"queue"`
 }
@@ -27,6 +29,7 @@ func ReadConfig(filename string) (Configuration, error) {
 	conf := Configuration{
 		DefaultDBUrl,
 		Port,
+		EventBroker,
 		EventBrokerURL,
 		Exchange,
 		Queue,
