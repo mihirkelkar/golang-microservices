@@ -1,0 +1,5 @@
+{
+  "eventbroker": "kafka",
+  "eventbrokerurl": "kafka:9092",
+  "databaseurl":"mongodb://events-db/events"
+}

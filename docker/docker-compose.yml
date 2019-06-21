@@ -1,0 +1,27 @@
+version: '3.5'
+
+services:
+  kafka:
+    image: "wurstmeister/kafka:0.10.2.0"
+    ports:
+     - "9092:9092"
+    hostname: kafka
+    networks:
+     - myevents-network
+    links:
+     - zookeeper
+    environment:
+     - KAFKA_ADVERTISED_HOST_NAME=kafka
+     - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+     - KAFKA_ADVERTISED_PORT=9092
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+     - myevents-network
+
+networks:
+  myevents-network:
+   name: myevents-network
