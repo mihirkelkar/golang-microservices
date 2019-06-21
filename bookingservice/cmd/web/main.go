@@ -1,12 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/Shopify/sarama"
 	"github.com/mihirkelkar/microservices/lib/configuration"
+	"github.com/mihirkelkar/microservices/lib/msgqueue"
 	msgqueue_amqp "github.com/mihirkelkar/microservices/lib/msgqueue/amqp"
+	msgqueue_kfka "github.com/mihirkelkar/microservices/lib/msgqueue/kafka"
 	"github.com/streadway/amqp"
 )
 
@@ -21,14 +25,33 @@ func main() {
 		infLog.Print("Using Default Configuration")
 	}
 
-	conn, err := amqp.Dial(conf.EventBrokerURL)
-	if err != nil {
-		errLog.Panic(err)
-	}
-	defer conn.Close()
+	var eventListener msgqueue.EventListener
 
-	//create a new event Emitter.
-	eventListener, err := msgqueue_amqp.NewEventListener(conn, conf.Exchange, conf.Queue)
+	switch conf.EventBroker {
+	case "rabbitmq":
+		conn, err := amqp.Dial(conf.EventBrokerURL)
+		if err != nil {
+			errLog.Panic(err)
+		}
+		defer conn.Close()
+
+		//create a new event Listener
+		eventListener, err = msgqueue_amqp.NewEventListener(conn, conf.Exchange, conf.Queue)
+	case "kafka":
+		config := sarama.NewConfig()
+		config.Consumer.Offsets.Initial = sarama.OffsetOldest
+		fmt.Println(conf.EventBrokerURL)
+		client, err := sarama.NewClient([]string{conf.EventBrokerURL}, config)
+		if err != nil {
+			errLog.Panic(err)
+		}
+
+		eventListener, err = msgqueue_kfka.NewKafkaEventListener(client, []int32{})
+		if err != nil {
+			errLog.Panic(err)
+		}
+
+	}
 
 	//create a new event service
 

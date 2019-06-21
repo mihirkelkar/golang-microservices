@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/mihirkelkar/microservices/contracts"
 	"github.com/mihirkelkar/microservices/lib/msgqueue"
 )
 
@@ -21,10 +22,14 @@ func (app *Application) ProcessEvents() {
 			app.handleEvent(evt)
 		case err := <-errors:
 			fmt.Printf("got error while receiving event: %s\n", err)
+			continue
 		}
 	}
 }
 
 func (app *Application) handleEvent(event msgqueue.Event) {
-	fmt.Print(event)
+	switch e := event.(type) {
+	case *contracts.EventCreatedEvent:
+		log.Printf("event %s created: %s", e.ID, e.Name)
+	}
 }
